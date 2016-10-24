@@ -13,12 +13,43 @@ function receiveData(json) {
 	}
 };
 
+function receiveCachedData(json) {
+	return{
+		type: 'RECV_CACHE_DATA',
+		data: json
+	}
+};
+
 function receiveError(json) {
 	return {
 		type: types.RECV_ERROR,
 		data: json
 	}
 };
+
+export function _httpGetWrapper(url){
+	return function(dispatch) {
+		caches.match(url).then(function(response){
+		  if(response){
+			return response.json();
+		  }
+		}).then(function(data){
+		  console.log('#### Cache Success');
+		  dispatch(receiveCachedData(data._embedded.goals));
+		  //updated DOM with success callback
+		});
+	 
+	  fetch(url).then(function(response){
+		console.log('#### Network Success');
+		dispatch(fetchData(url));
+		//updated DOM with success callback
+		//success(response);
+	  })
+		.catch(function(response){
+			console.log('#### Network Error');
+		});
+	}
+}
 
 export function fetchData(url) {
 	return function(dispatch) {
@@ -37,6 +68,7 @@ export function fetchData(url) {
 				dispatch(pushState(null,'/error'));
 			})
 	}
+	
 };
 
 export function insertGoal(url, description) {

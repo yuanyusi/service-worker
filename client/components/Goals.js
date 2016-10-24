@@ -1,18 +1,18 @@
 import React from 'react';
 import Box from './Box';
-const url = 'http://localhost:8080/api/goals';
+const urlPath = 'http://localhost:8080/api/goals';
 
 class Goals extends React.Component {
 	constructor(props){
 		super(props);
 		this.handleSubmit = this.handleSubmit.bind(this);
-		this.props.fetchData(url);
+		this.props._httpGetWrapper(urlPath);
 	}
 
 	handleSubmit(e){
 		
 		e.preventDefault();
-		this.props.insertGoal(url, this.refs.description.value);
+		this.props.insertGoal(urlPath, this.refs.description.value);
 		this.refs.goalForm.reset();
 		
 	}

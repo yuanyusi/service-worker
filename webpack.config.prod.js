@@ -39,13 +39,13 @@ module.exports = {
     // CSS
     { 
       test: [/\.styl$/, /\.css$/],
-      //include: path.join(__dirname, 'client'),
+      include: path.join(__dirname, 'client'),
       loader: 'style-loader!css-loader!stylus-loader'
     },
-	{
-		test: path.join(__dirname, '.'),
-		exclude: /(node_modules)/,
-		loader: 'babel-loader'
+    {
+		test: /\.ico$/,
+		loader: "url-loader",
+		query: { mimetype: "image/x-icon" }
 	}
     ]
   }

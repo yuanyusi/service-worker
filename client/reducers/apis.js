@@ -13,6 +13,8 @@ function apis(state = {
 			return Object.assign({}, state, {isLoading: false, data: action.data, error: false });
 		case types.REQ_DATA:
 			return Object.assign({}, state, {isLoading: true, error: false });
+		case 'RECV_CACHE_DATA':
+			return Object.assign({}, state, {isLoading: false, data: action.data, error: false });
 		case 'SUCCESS_GOAL':
 			return {
 				...state,

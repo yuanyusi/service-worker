@@ -18,6 +18,20 @@ import { Router, Route, IndexRoute, browserHistory } from 'react-router';
 import { reduxReactRouter, routerStateReducer, ReduxRouter } from 'redux-react-router';
 import store, { history } from './store';
 
+/*var { AsyncStorage } = React;
+
+ console.log('teset');
+
+try {
+  const value =  AsyncStorage.getItem('@MySuperStore:key');
+  if (value !== null){
+    // We have data!!
+    console.log(value);
+  }
+} catch (error) {
+  // Error retrieving data
+}
+*/
 const router = (
 	<Provider store={store}>
 		<Router history={history}>
