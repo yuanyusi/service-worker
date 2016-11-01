@@ -1,6 +1,7 @@
 import React from 'react';
 import Box from './Box';
-const urlPath = 'http://localhost:8080/api/goals';
+//const urlPath = 'http://localhost:8080/api/goals';
+const urlPath = 'https://localhost:8444/api/goals';
 
 class Goals extends React.Component {
 	constructor(props){
@@ -9,12 +10,10 @@ class Goals extends React.Component {
 		this.props._httpGetWrapper(urlPath);
 	}
 
-	handleSubmit(e){
-		
+	handleSubmit(e){		
 		e.preventDefault();
 		this.props.insertGoal(urlPath, this.refs.description.value);
-		this.refs.goalForm.reset();
-		
+		this.refs.goalForm.reset();		
 	}
 	
 	render(){

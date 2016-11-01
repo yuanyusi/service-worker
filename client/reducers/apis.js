@@ -24,6 +24,15 @@ function apis(state = {
 				  ...state.data.slice(i + 1)
 				]
 			}
+		case 'UPDATE_GOAL_OFFLINE':
+			return {
+				...state,
+				data: [
+				  ...state.data.slice(0, i),
+				  Object.assign({}, state.data[i], action.json),
+				  ...state.data.slice(i + 1)
+				]
+			}
 		case 'FAILED_GOAL':
 			return {
 				...state,

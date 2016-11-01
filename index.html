@@ -5,8 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="manifest" href="manifest.json">
     <title>Reduxstagram</title>
-    <link rel="shortcut icon" type="image/png" href="http://wes.io/ehRe/my-favourite-icon.png"/>
-	
+    <link rel="shortcut icon" type="image/png" href="http://wes.io/ehRe/my-favourite-icon.png"/>	
 	<link rel="stylesheet" href="https://code.getmdl.io/1.1.3/material.indigo-pink.min.css"> 
 	<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
 
@@ -29,26 +28,178 @@
 
   
   </div>
-    <script src="/dist/bundle.js"></script>
+  <div id="connectionStatus">You are currently offline. Any requests made will be queued and synced as soon as you are
+    connected again.
+</div>
+    <script src="/static/bundle.js"></script>
 	<script defer src="https://code.getmdl.io/1.1.3/material.min.js"></script>
     <script src="https://cdn.jsdelivr.net/umbrella/2.0.1/umbrella.min.js"></script>
+	<script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+	<script type="text/javascript" src="node_modules/axios/dist/axios.js"></script>   
+	<script src="offline.min.js"></script>	
 	
 	<script>
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/service-worker.js', {
-                scope: '/'
-            }).then(function(reg) {
-                if (reg.installing) {
-                    console.log('installing');
-                } else if (reg.waiting) {
-                    console.log('installed');
-                } else if (reg.active) {
-                    console.log('active');
-                }
-            }).catch(function(error) {
-                console.log(error);
-            });
+		
+    function isOnline() {
+        var connectionStatus = document.getElementById('connectionStatus');
+		var reload = false;
+        if (navigator.onLine) {
+            connectionStatus.innerHTML = 'You are currently online!';
+            //console.log("Queue offline are sync...");
+			window.networkstatus = true;
+			
+			//var postURI = 'http://localhost:8080/api/goals';
+			var postURI = 'https://localhost:8444/api/goals';
+			if (localStorage.getItem("deleteOfflineGoals")){
+			var offlineIds = localStorage.getItem("deleteOfflineGoals").split(',');
+				$.each(offlineIds, function (index, id) {
+					var Object =  JSON.parse(localStorage.getItem("goals"));
+					var newObject = {"goals":[]};
+					$.each(Object.goals, function (indexGoal, value) {
+						if (value._links.search(id) == -1){
+							newObject.goals.push(value);
+						}
+					})
+					
+					if (newObject.goals.length != 0){
+						localStorage.setItem("goals", JSON.stringify(newObject));
+					} 
+					else localStorage.removeItem("goals");
+				})
+				localStorage.removeItem("deleteOfflineGoals");
+			}
+			
+			if (localStorage.getItem("updatedGoals")){
+			var updatedGoalArray =  localStorage.getItem("updatedGoals").split(',');
+				 $.each(updatedGoalArray, function (index, value) {
+				 var updatedValue = JSON.parse(localStorage.getItem(value));
+
+				 var data = {
+					_links: "", 
+					createdAt: null,
+					description: "",
+					failures: updatedValue.failures, 
+					successes: updatedValue.successes, 
+					updatedAt:null
+					};
+					axios({
+					  method: 'post',
+					  url: postURI+'/update/'+value,
+					  json: true,
+					  data: data
+					})
+					.then(function(response) {
+						console.log("Success");
+					})
+					.catch(function(response){
+						console.log("error");
+					})		
+					localStorage.removeItem(value);					
+				})
+				localStorage.removeItem("updatedGoals");
+				reload = true;
+			}
+            if (localStorage.getItem("goals")){	
+
+				if (localStorage.getItem("updatedOfflineGoals")){
+					var goals =  JSON.parse(localStorage.getItem("goals"));
+					var newObject = {"goals":[]};
+						// kondisi goals tidak kosong
+					 $.each(goals.goals, function (index, value) {
+						 if (localStorage.getItem(value._links)){
+							 var updatedValue = JSON.parse(localStorage.getItem(value._links));
+							 newObject.goals.push(updatedValue);
+						 }
+						 else newObject.goals.push(value);
+						localStorage.removeItem(value._links);					 
+					 })
+					if (newObject.goals.length != 0){
+						localStorage.setItem("goals", JSON.stringify(newObject));
+					} 
+					else localStorage.removeItem("goals");
+					
+					localStorage.removeItem("updatedOfflineGoals");
+				}
+			
+			// add goals
+				var goals =  JSON.parse(localStorage.getItem("goals"));
+				 $.each(goals.goals, function (index, value) {
+					
+					axios({
+					  method: 'post',
+					  url: postURI,
+					  json: true,
+					  data: {
+						description: value.description,
+						createdAt: new Date(value.createdAt),
+						successes: value.successes,
+						failures: value.failures
+					  }
+					})
+					.then(function(response) {
+						console.log("Success");
+					})
+					.catch(function(response){
+						console.log("error");
+					})			
+				})
+				localStorage.removeItem("goals");
+				// shortcut to update Redux State
+				
+				reload = true;
+			}
+			
+			if (localStorage.getItem("deleteGoals")){
+				var ids = localStorage.getItem("deleteGoals").split(',');
+				$.each(ids, function (index, id) {
+					axios({
+						method: 'delete',
+						url: postURI + '/' + id,
+						data: null,
+						withCredentials: true,
+						params: {
+						}
+					})
+				})
+				localStorage.removeItem("deleteGoals");
+			}	
+
+			if (reload){
+				//location.reload(reload);
+				reload = false;
+			} 
+        } else {
+			 //console.log('offline');
+			 window.networkstatus = false;
+            connectionStatus.innerHTML =
+                    'You are currently offline. Any requests made will be queued and synced as soon as you are connected again.';
         }
+    }
+	
+	window.addEventListener('online', isOnline);
+	window.addEventListener('offline', isOnline);
+    isOnline();
+	
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/service-worker.js', {
+            scope: '/'
+        }).then(function (reg) {
+            if (reg.installing) {
+                console.log('installing');
+            } else if (reg.waiting) {
+                console.log('installed');
+            } else if (reg.active) {
+                console.log('active');
+            }
+        }).catch(function (error) {
+            console.log(error);
+        });
+    }
+    // Then later, request a one-off sync:
+    navigator.serviceWorker.ready.then(function (swRegistration) {
+        return swRegistration.sync.register('myFirstSync');
+    });
+</script>
     </script>
   </body>
 </html>

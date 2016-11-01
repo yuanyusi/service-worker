@@ -1,5 +1,6 @@
 import React from 'react';
-const url = 'http://localhost:8080/api/goals';
+//const urlPath = 'http://localhost:8080/api/goals';
+const urlPath = 'https://localhost:8444/api/goals';
 
 class Box extends React.Component {
 	constructor(props){
@@ -7,39 +8,47 @@ class Box extends React.Component {
 		this.handleDelete = this.handleDelete.bind(this);
 		this.handleSuccesses = this.handleSuccesses.bind(this);
 		this.handleFailures = this.handleFailures.bind(this);
-		var uid = this.props.emp._links.self.href.slice(0, 100).split('goals/');
-		this.id = uid[1];		
 	}
    
-	handleDelete(e){
-		
+	handleDelete(e){		
 		e.preventDefault();
-		this.props.removeGoal(url, this.id, this.props.i);
+		if (this.props.emp._links.self){
+			var uid = this.props.emp._links.self.href.slice(0, 100).split('goals/');
+			this.id = uid[1];		
+		}
+		else this.id = this.props.emp._links;
+		this.props.removeGoal(urlPath, this.id, this.props.i);
 	}
 	
-	handleSuccesses(e){
-		
+	handleSuccesses(e){		
 		e.preventDefault();
-		this.props.successesGoal(url, this.id, this.props.i);
+		
+		if (this.props.emp._links.self){
+			var uid = this.props.emp._links.self.href.slice(0, 100).split('goals/');
+			this.id = uid[1];		
+		}
+		else this.id = this.props.emp._links;
+		this.props.successesGoal(urlPath, this.id, this.props.i, this.props.emp);
 	}
 	
-	handleFailures(e){
-		
+	handleFailures(e){		
 		e.preventDefault();
-		this.props.failuresGoal(url, this.id, this.props.i);
-	}
-	
+		if (this.props.emp._links.self){
+			var uid = this.props.emp._links.self.href.slice(0, 100).split('goals/');
+			this.id = uid[1];		
+		}
+		else this.id = this.props.emp._links;
+		this.props.failuresGoal(urlPath, this.id, this.props.i, this.props.emp);
+	}	
 	
 	render() {
 		var emp = this.props.emp;
-		var d = emp.createdAt.slice(0, 10).split('-');   
-        var formatDate = d[1] +'/'+ d[2] +'/'+ d[0]; // 10/30/2010
+		var formatDate = emp.createdAt.replace(/-/g, "/");   
 
 		return (
 <ul className="goals-list content-grid mdl-grid">
 
   <li id="1" className="mdl-card mdl-shadow--2dp">
-
    
     <div className="mdl-card__title mdl-color--light-blue-700 mdl-color-text--white">
       <h2>
@@ -48,13 +57,11 @@ class Box extends React.Component {
       </h2>
     </div>
     <div className="mdl-layout-spacer"></div>
-
    
     <div className="mdl-card__supporting-text">
       Since {formatDate}		 
 			
     </div>
-
    
     <div className="mdl-card__actions mdl-card--border">
       <button className="mdl-button mdl-js-button mdl-button--primary success" onClick={this.handleSuccesses}><i className="material-icons">trending_up</i></button>

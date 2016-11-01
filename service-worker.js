@@ -17,11 +17,12 @@ var cacheName = 'weatherPWA-final-1';
 var filesToCache = [
   '/',
   '/index.html',
-  //'/client/crud.js',
-  '/dist/bundle.js',
-  '/manifest.json',
-  '/service-worker.js',
-  //'http://localhost:8080/api/goals'
+  '/static/bundle.js'
+ // '/manifest.json',
+ // '/service-worker.js',
+ // '/node_modules/axios/dist/axios.js',
+ // '/offline.min.js',
+  //'/favicon.ico'
 ];
 
 self.addEventListener('install', function(e) {
@@ -61,9 +62,9 @@ self.addEventListener('activate', function(e) {
 
 
 self.addEventListener('fetch', function(e) {
- // console.log('[Service Worker] Fetch', e.request.url);
-  
-  var dataUrl = 'http://localhost:8080/api/goals';
+  console.log('[Service Worker] Fetch', e.request.url);
+ // var dataUrl = 'http://localhost:8080/api/goals';
+  var dataUrl = 'https://localhost:8444/api/goals';
   if (e.request.url.indexOf(dataUrl) > -1) {
 
     e.respondWith(
@@ -84,34 +85,3 @@ self.addEventListener('fetch', function(e) {
     );
   }
 });
-
-/*
-self.addEventListener('fetch', function (event) {
-	 //console.log('[Service Worker] Fetch', event.request.url);
-  event.respondWith(
-      caches.match(event.request).then(function (response) {
-        if (response) {
-          return response;
-        }
-        return fetch(event.request.clone()).then(function (response) {
-          if (!response || response.status !== 200 || response.type !== 'basic') {
-            return response;
-          }
-          var responseCache = response.clone();
-          caches.open(cacheName).then(function (cache) {
-            cache.put(event.request, responseCache);
-          });
-          return response;
-        });
-      })
-  );
-});
-
-
-self.addEventListener('fetch', event => {
-  event.respondWith(
-    caches.match(event.request).then(response => {
-      return response || fetch(event.request);
-    })
-  );
-});*/
